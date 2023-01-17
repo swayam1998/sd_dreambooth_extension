@@ -3,7 +3,6 @@ import os
 import traceback
 
 from extensions.sd_dreambooth_extension.dreambooth.db_concept import Concept
-from modules import images, shared
 
 
 def sanitize_name(name):
@@ -130,9 +129,9 @@ class DreamboothConfig:
         if revision == "" or revision is None:
             revision = 0
         model_name = "".join(x for x in model_name if (x.isalnum() or x in "._- "))
-        models_path = shared.cmd_opts.dreambooth_models_path
+        models_path = "/opt/ml/model"
         if models_path == "" or models_path is None:
-            models_path = os.path.join(shared.models_path, "dreambooth")
+            models_path = os.path.join(models_path, "dreambooth")
         model_dir = os.path.join(models_path, model_name)
         working_dir = os.path.join(model_dir, "working")
         if not os.path.exists(working_dir):
@@ -247,7 +246,7 @@ class DreamboothConfig:
                 c_count = 0
                 for concept in concepts:
                     if concept.is_valid():
-                        if concept.class_data_dir == "" or concept.class_data_dir is None or concept.class_data_dir == shared.script_path:
+                        if concept.class_data_dir == "" or concept.class_data_dir is None :
                             class_dir = os.path.join(model_dir, f"classifiers_{c_count}")
                             if not os.path.exists(class_dir):
                                 os.makedirs(class_dir)
@@ -264,9 +263,7 @@ class DreamboothConfig:
         Save the config file
         """
         self.lifetime_revision = self.initial_revision + self.revision
-        models_path = shared.cmd_opts.dreambooth_models_path
-        if models_path == "" or models_path is None:
-            models_path = os.path.join(shared.models_path, "dreambooth")
+        models_path = "/opt/ml/model/"
 
         config_file = os.path.join(models_path, self.model_name, "db_config.json")
         with open(config_file, "w") as outfile:
@@ -294,9 +291,7 @@ def from_file(model_name):
     if isinstance(model_name, list):
         model_name = model_name[0]
     model_name = sanitize_name(model_name)
-    models_path = shared.cmd_opts.dreambooth_models_path
-    if models_path == "" or models_path is None:
-        models_path = os.path.join(shared.models_path, "dreambooth")
+    models_path = "/opt/ml/input/data/models/"
     working_dir = os.path.join(models_path, model_name, "working")
     config_file = os.path.join(models_path, model_name, "db_config.json")
     try:
