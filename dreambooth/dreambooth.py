@@ -15,11 +15,10 @@ from extensions.sd_dreambooth_extension.dreambooth.db_config import from_file, D
 from extensions.sd_dreambooth_extension.dreambooth.db_concept import Concept
 from extensions.sd_dreambooth_extension.dreambooth.utils import reload_system_models, unload_system_models, printm, \
     isset, list_features, is_image, get_images, get_lora_models
-from modules import shared, devices
 import requests
 
 try:
-    cmd_dreambooth_models_path = shared.cmd_opts.dreambooth_models_path
+    cmd_dreambooth_models_path = "/opt/ml/input/data/models/"
 except:
     cmd_dreambooth_models_path = None
 
@@ -298,16 +297,7 @@ def load_params(model_dir):
 
 
 def load_model_params(model_dir):
-    if shared.cmd_opts.pureui:
-        api_endpoint = os.environ['api_endpoint']
-        params = {'module': 'dreambooth_params', 'dreambooth_model': model_dir}
-        response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
-        if response.status_code == 200:
-            data = json.loads(response.text)
-        else:
-            data = None
-    else:
-        data = from_file(model_dir)
+    data = from_file(model_dir)
     if data is None:
         print("Can't load config!")
         msg = f"Error loading config for model '{model_dir}'."
@@ -356,7 +346,6 @@ def start_training_from_config(config: DreamboothConfig, lora_model_name: str, l
         msg = "Invalid resolution."
 
     if msg:
-        shared.state.textinfo = msg
         print(msg)
         dirs = get_lora_models()
         lora_model_name = gradio.Dropdown.update(choices=sorted(dirs), value=lora_model_name)
@@ -370,27 +359,22 @@ def start_training_from_config(config: DreamboothConfig, lora_model_name: str, l
 
     try:
         if imagic_only:
-            shared.state.textinfo = "Initializing imagic training..."
-            print(shared.state.textinfo)
             from extensions.sd_dreambooth_extension.dreambooth.train_imagic import train_imagic
             mem_record = train_imagic(config, mem_record)
         else:
-            shared.state.textinfo = "Initializing dreambooth training..."
-            print(shared.state.textinfo)
             from extensions.sd_dreambooth_extension.dreambooth.train_dreambooth import main
             config, mem_record, msg = main(config, mem_record, use_subdir=use_subdir, lora_model=lora_model_name,
                                            lora_alpha=lora_alpha, lora_txt_alpha=lora_txt_alpha, custom_model_name=custom_model_name)
             if config.revision != total_steps:
                 config.save()
         total_steps = config.revision
-        res = f"Training {'interrupted' if shared.state.interrupted else 'finished'}. " \
+        res = f"Training {'finished'}. " \
               f"Total lifetime steps: {total_steps} \n"
     except Exception as e:
         res = f"Exception training model: {e}"
         traceback.print_exc()
         pass
 
-    devices.torch_gc()
     gc.collect()
     printm("Training completed, reloading SD Model.")
     print(f'Memory output: {mem_record}')
