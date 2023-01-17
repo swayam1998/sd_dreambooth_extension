@@ -15,25 +15,21 @@ from transformers import AutoTokenizer, CLIPTextModel
 
 from extensions.sd_dreambooth_extension.dreambooth.db_config import from_file
 from extensions.sd_dreambooth_extension.dreambooth.finetune_utils import FilenameTextGetter, PromptDataset
-from modules import shared, paths
 import requests
 
 try:
-    cmd_dreambooth_models_path = shared.cmd_opts.dreambooth_models_path
+    cmd_dreambooth_models_path = "/opt/ml/model/"
 except:
     cmd_dreambooth_models_path = None
 
 try:
-    cmd_lora_models_path = shared.cmd_opts.lora_models_path
+    cmd_lora_models_path = "/opt/ml/input/data/models/"
 except:
     cmd_lora_models_path = None
 
 
 def printi(msg, params=None, log=True):
     if log:
-        shared.state.textinfo = msg
-        if shared.state.job_count > shared.state.job_no:
-            shared.state.job_no += 1
         if params:
             print(msg, params)
         else:
@@ -42,18 +38,9 @@ def printi(msg, params=None, log=True):
 
 def get_db_models():
     output = []
-    if shared.cmd_opts.pureui:
-        api_endpoint = os.environ['api_endpoint']
-        params = {'module': 'dreambooth'}
-        response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
-        if response.status_code == 200:
-            items = json.loads(response.text)
-            for item in items:
-                output.append(item)
-    else:
-        model_dir = os.path.dirname(cmd_dreambooth_models_path) if cmd_dreambooth_models_path else paths.models_path
-        out_dir = os.path.join(model_dir, "dreambooth")
-        if os.path.exists(out_dir):
+    model_dir = os.path.dirname(cmd_dreambooth_models_path) if cmd_dreambooth_models_path else paths.models_path
+    out_dir = os.path.join(model_dir, "dreambooth")
+    if os.path.exists(out_dir):
             dirs = os.listdir(out_dir)
             for found in dirs:
                 if os.path.isdir(os.path.join(out_dir, found)):
@@ -63,18 +50,9 @@ def get_db_models():
 
 def get_lora_models():
     output = [""]
-    if shared.cmd_opts.pureui:
-        api_endpoint = os.environ['api_endpoint']
-        params = {'module': 'lora'}
-        response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
-        if response.status_code == 200:
-            items = json.loads(response.text)
-            for item in items:
-                output.append(item)
-    else:
-        model_dir = os.path.dirname(cmd_lora_models_path) if cmd_lora_models_path else paths.models_path
-        out_dir = os.path.join(model_dir, "lora")
-        if os.path.exists(out_dir):
+    model_dir = os.path.dirname(cmd_lora_models_path) if cmd_lora_models_path else paths.models_path
+    out_dir = os.path.join(model_dir, "lora")
+    if os.path.exists(out_dir):
             dirs = os.listdir(out_dir)
             for found in dirs:
                 if os.path.isfile(os.path.join(out_dir, found)):
@@ -157,15 +135,7 @@ def cleanup(do_print: bool = False):
 
 
 def unload_system_models():
-    if shared.sd_model is not None:
-        shared.sd_model.to("cpu")
-    for former in shared.face_restorers:
-        try:
-            former.send_model_to("cpu")
-        except:
-            pass
-    cleanup()
-    printm("", True)
+    pass
 
 
 def list_attention():
@@ -197,9 +167,7 @@ def list_floats():
 
 
 def reload_system_models():
-    if shared.sd_model is not None:
-        shared.sd_model.to(shared.device)
-    printm("Restored system models.")
+    pass
 
 
 def debug_prompts(model_dir):
@@ -239,7 +207,7 @@ def debug_prompts(model_dir):
         text_getter = FilenameTextGetter(config.shuffle_tags)
         c_idx = 0
         class_images_dir = Path(concept["class_data_dir"])
-        if class_images_dir == "" or class_images_dir is None or class_images_dir == shared.script_path:
+        if class_images_dir == "" or class_images_dir is None:
             class_images_dir = os.path.join(config.model_dir, f"classifiers_{c_idx}")
             print(f"Class image dir is not set, defaulting to {class_images_dir}")
         class_images_dir.mkdir(parents=True, exist_ok=True)
@@ -281,23 +249,21 @@ def generate_sample_img(model_dir: str, save_sample_prompt: str, seed: str):
             feature_extractor=None,
             requires_safety_checker=False
         )
-        pipeline = pipeline.to(shared.device)
+        pipeline = pipeline.to("cuda")
         pil_features = list_features()
-        save_dir = os.path.join(shared.sd_path, "outputs", "dreambooth")
+        save_dir = os.path.join("/opt/ml/", "outputs", "dreambooth")
         db_model_path = config.model_dir
         if save_sample_prompt is None:
             msg = "Please provide a sample prompt."
             print(msg)
             return msg, None
-        shared.state.textinfo = f"Generating preview image for model {db_model_path}..."
         # I feel like this might not actually be necessary...but what the heck.
         if seed is None or seed == '' or seed == -1:
             seed = int(random.randrange(21474836147))
-        g_cuda = torch.Generator(device=shared.device).manual_seed(seed)
+        g_cuda = torch.Generator(device="cuda").manual_seed(seed)
         sample_dir = os.path.join(save_dir, "samples")
         os.makedirs(sample_dir, exist_ok=True)
         file_count = 0
-        shared.state.job_count = 1
         with torch.autocast("cuda"), torch.inference_mode():
             image = pipeline(save_sample_prompt,
                              num_inference_steps=60,
