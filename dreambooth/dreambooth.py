@@ -13,8 +13,7 @@ from diffusers.utils import logging as dl
 
 from extensions.sd_dreambooth_extension.dreambooth.db_config import from_file, DreamboothConfig
 from extensions.sd_dreambooth_extension.dreambooth.db_concept import Concept
-from extensions.sd_dreambooth_extension.dreambooth.utils import reload_system_models, unload_system_models, printm, \
-    isset, list_features, is_image, get_images, get_lora_models
+from extensions.sd_dreambooth_extension.dreambooth.utils import unload_system_models, printm, isset
 import requests
 
 try:
@@ -347,9 +346,6 @@ def start_training_from_config(config: DreamboothConfig, lora_model_name: str, l
 
     if msg:
         print(msg)
-        dirs = get_lora_models()
-        lora_model_name = gradio.Dropdown.update(choices=sorted(dirs), value=lora_model_name)
-        return lora_model_name, msg, 0, msg
 
     # Clear memory and do "stuff" only after we've ensured all the things are right
     print(f"Custom model name is {custom_model_name}")
@@ -378,10 +374,3 @@ def start_training_from_config(config: DreamboothConfig, lora_model_name: str, l
     gc.collect()
     printm("Training completed, reloading SD Model.")
     print(f'Memory output: {mem_record}')
-    reload_system_models()
-    if lora_model_name != "" and lora_model_name is not None:
-        lora_model_name = f"{config.model_name}_{total_steps}.pt"
-    print(f"Returning result: {res}")
-    dirs = get_lora_models()
-    lora_model_name = gradio.Dropdown.update(choices=sorted(dirs), value=lora_model_name)
-    return lora_model_name, res, total_steps, res
