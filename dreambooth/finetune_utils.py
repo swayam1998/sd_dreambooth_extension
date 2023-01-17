@@ -9,7 +9,6 @@ import torch.utils.checkpoint
 from torch.utils.data import Dataset
 from transformers import CLIPTextModel
 
-from modules import shared, devices
 
 
 class FilenameTextGetter:
@@ -18,8 +17,7 @@ class FilenameTextGetter:
     re_numbers_at_start = re.compile(r"^[-\d]+\s*")
 
     def __init__(self, shuffle_tags=False):
-        self.re_word = re.compile(shared.opts.dataset_filename_word_regex) if len(
-            shared.opts.dataset_filename_word_regex) > 0 else None
+        self.re_word = None
         self.shuffle_tags = shuffle_tags
 
     def read_text(self, img_path):
@@ -34,7 +32,7 @@ class FilenameTextGetter:
             filename_text = re.sub(self.re_numbers_at_start, '', filename_text)
             if self.re_word:
                 tokens = self.re_word.findall(filename_text)
-                filename_text = (shared.opts.dataset_filename_join_string or "").join(tokens)
+                filename_text = ("").join(tokens)
 
         filename_text = filename_text.replace("\\", "")  # work with \(franchies\)
         return filename_text
@@ -146,7 +144,9 @@ class EMAModel:
             else:
                 s_param.copy_(param)
 
-        devices.torch_gc()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
 
     def copy_to(self, parameters: Iterable[torch.nn.Parameter]) -> None:
         """
@@ -208,7 +208,8 @@ def encode_hidden_state(text_encoder: CLIPTextModel, input_ids, pad_tokens, b_si
     if pad_tokens:
         input_ids = input_ids.reshape((-1, tokenizer_max_length))  # batch_size*3, 77
 
-    clip_skip = shared.opts.CLIP_stop_at_last_layers
+    #clip_skip = shared.opts.CLIP_stop_at_last_layers
+    clip_skip = 1
     if clip_skip <= 1:
         encoder_hidden_states = text_encoder(input_ids)[0]
     else:
