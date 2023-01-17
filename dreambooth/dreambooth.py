@@ -18,7 +18,7 @@ from extensions.sd_dreambooth_extension.dreambooth.utils import reload_system_mo
 import requests
 
 try:
-    cmd_dreambooth_models_path = "/opt/ml/input/data/models/"
+    cmd_dreambooth_models_path = "/opt/ml/model/"
 except:
     cmd_dreambooth_models_path = None
 
