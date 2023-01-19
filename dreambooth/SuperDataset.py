@@ -6,12 +6,23 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 from pathlib import Path
-
 from extensions.sd_dreambooth_extension.dreambooth.db_concept import Concept
 from extensions.sd_dreambooth_extension.dreambooth.utils import list_features, is_image, get_images
 from extensions.sd_dreambooth_extension.dreambooth.finetune_utils import FilenameTextGetter
-from modules import images
 
+
+
+def sanitize_filename_part(text, replace_spaces=True):
+    if text is None:
+        return None
+
+    if replace_spaces:
+        text = text.replace(' ', '_')
+
+    text = text.translate({ord(x): '_' for x in invalid_filename_chars})
+    text = text.lstrip(invalid_filename_prefix)[:max_filename_part_length]
+    text = text.rstrip(invalid_filename_postfix)
+    return text
 
 class SampleData:
     def __init__(self, prompt: str, concept: Concept):
@@ -133,7 +144,7 @@ class SuperDataset(Dataset):
             if "[filewords]" in instance_prompt and instance_token != "":
                 concept_key = instance_token
             else:
-                concept_key = images.sanitize_filename_part(instance_prompt)
+                concept_key = sanitize_filename_part(instance_prompt)
 
             # Determine the max steps for the concept
             max_steps = concept.max_steps

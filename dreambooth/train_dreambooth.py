@@ -73,6 +73,33 @@ def import_model_class_from_model_name_or_path(pretrained_model_name_or_path: st
 def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
+            "--model_name",
+            type=str,
+            default=None,
+            required=True,
+            help="name of trained model.",
+    )
+    parser.add_argument(
+        "--models_path",
+        type=str,
+        default=None,
+        required=True,
+        help="Path to save trained model.",
+    )
+    parser.add_argument(
+        "--use_lora",
+        type=bool,
+        default=False,
+        help="whether to use lora model.",
+    )
+    parser.add_argument(
+        "--lora_models_path",
+        type=str,
+        default=None,
+        required=True,
+        help="Path to load lora trained model.",
+    )
+    parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
         default=None,
@@ -877,7 +904,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                             out_file = None
                             s_pipeline.save_pretrained(args.pretrained_model_name_or_path)
 
-                            compile_checkpoint(args.model_name, half=args.half_model, use_subdir=use_subdir,
+                            compile_checkpoint('/opt/ml/model/',args.models_path,None,args.model_name, half=args.half_model, use_subdir=use_subdir,
                                                reload_models=False, lora_path=out_file, log=False,
                                                custom_model_name=custom_model_name
                                                )
