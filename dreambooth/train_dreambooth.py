@@ -96,7 +96,6 @@ def parse_args(input_args=None):
         "--lora_models_path",
         type=str,
         default=None,
-        required=True,
         help="Path to load lora trained model.",
     )
     parser.add_argument(
