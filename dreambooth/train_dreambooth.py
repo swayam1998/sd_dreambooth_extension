@@ -157,7 +157,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--with_prior_preservation",
         default=False,
-        action="store_true",
+        type=bool,
         help="Flag to add prior preservation loss.",
     )
     parser.add_argument("--prior_loss_weight", type=float, default=1.0, help="The weight of prior preservation loss.")
@@ -383,7 +383,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
     global mem_record
     mem_record = memory_record
     max_train_steps = args.max_train_steps
-    logging_dir = Path(args.model_dir, "logging")
+    logging_dir = Path('/opt/ml/model/', "logging")
     args.max_token_length = int(args.max_token_length)
     if not args.pad_tokens and args.max_token_length > 75:
         print("Cannot raise token length limit above 75 when pad_tokens=False")
