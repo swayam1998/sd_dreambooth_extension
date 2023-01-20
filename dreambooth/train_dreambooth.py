@@ -1146,3 +1146,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
     cleanup_memory()
     accelerator.end_training()
     return args, mem_record, msg
+
+if __name__ == '__main__':
+    args=parse_args(None)
+    main(args=args, memory_record={}, use_subdir=False, lora_model=None, lora_alpha=1.0, lora_txt_alpha=1.0, custom_model_name="")
