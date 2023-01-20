@@ -438,7 +438,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
         if with_prior:
             class_images_dir = concept["class_data_dir"]
             if class_images_dir == "" or class_images_dir is None :
-                class_images_dir = os.path.join(args.model_dir, f"classifiers_{c_idx}")
+                class_images_dir = os.path.join(args.models_path, f"classifiers_{c_idx}")
                 print(f"Class image dir is not set, defaulting to {class_images_dir}")
             class_images_dir = Path(class_images_dir)
             class_images_dir.mkdir(parents=True, exist_ok=True)
@@ -913,7 +913,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                         print(f"Exception saving checkpoint/model: {ex}")
                         traceback.print_exc()
                         pass
-                save_dir = args.model_dir
+                save_dir = args.models_path
                 if save_img:
                     try:
                         s_pipeline.set_progress_bar_config(disable=True)
