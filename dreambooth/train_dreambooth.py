@@ -93,6 +93,12 @@ def parse_args(input_args=None):
         help="whether to use lora model.",
     )
     parser.add_argument(
+        "--use_cpu",
+        type=bool,
+        default=False,
+        help="whether to use cpu for accelerate.",
+    )
+    parser.add_argument(
         "--lora_models_path",
         type=str,
         default=None,
