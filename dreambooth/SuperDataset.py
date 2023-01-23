@@ -10,7 +10,13 @@ from extensions.sd_dreambooth_extension.dreambooth.db_concept import Concept
 from extensions.sd_dreambooth_extension.dreambooth.utils import list_features, is_image, get_images
 from extensions.sd_dreambooth_extension.dreambooth.finetune_utils import FilenameTextGetter
 
-
+invalid_filename_chars = '<>:"/\\|?*\n'
+invalid_filename_prefix = ' '
+invalid_filename_postfix = ' .'
+re_nonletters = re.compile(r'[\s' + string.punctuation + ']+')
+re_pattern = re.compile(r"(.*?)(?:\[([^\[\]]+)\]|$)")
+re_pattern_arg = re.compile(r"(.*)<([^>]*)>$")
+max_filename_part_length = 128
 
 def sanitize_filename_part(text, replace_spaces=True):
     if text is None:

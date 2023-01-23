@@ -541,9 +541,9 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
         )
     else:
         tokenizer = AutoTokenizer.from_pretrained(
-            os.path.join(args.pretrained_model_name_or_path, "tokenizer"),
+            args.pretrained_model_name_or_path,
+            subfolder="tokenizer",
             revision=args.revision,
-            use_fast=False,
         )
 
     # import correct text encoder class
