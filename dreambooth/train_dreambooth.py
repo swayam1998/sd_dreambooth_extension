@@ -460,8 +460,8 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
         cur_class_images = 0
         print(f"Checking concept: {concept}")
         text_getter = FilenameTextGetter(args.shuffle_tags)
-        print(f"Concept requires {concept.num_class_images} images.")
-        with_prior = concept.num_class_images > 0
+        print(f"Concept requires {concept['num_class_images']} images.")
+        with_prior = concept['num_class_images'] > 0
         if with_prior:
             class_images_dir = concept["class_data_dir"]
             if class_images_dir == "" or class_images_dir is None :
@@ -473,8 +473,8 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
             for _ in class_images:
                 cur_class_images += 1
             print(f"Class dir {class_images_dir} has {cur_class_images} images.")
-            if cur_class_images < concept.num_class_images:
-                num_new_images = concept.num_class_images - cur_class_images
+            if cur_class_images < concept['num_class_images']:
+                num_new_images = concept['num_class_images'] - cur_class_images
                 torch_dtype = torch.float16 if accelerator.device.type == "cuda" else torch.float32
                 if concept_pipeline is None:
                     concept_pipeline = DiffusionPipeline.from_pretrained(
@@ -494,22 +494,22 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                     concept_pipeline.set_progress_bar_config(disable=True)
                     concept_pipeline.to(accelerator.device)
 
-                concept_images = get_images(concept.instance_data_dir)
+                concept_images = get_images(concept['instance_data_dir'])
                 filename_texts = [text_getter.read_text(x) for x in concept_images]
-                sample_dataset = PromptDataset(concept.class_prompt, num_new_images, filename_texts,
-                                               concept.class_token,
-                                               concept.instance_token)
+                sample_dataset = PromptDataset(concept['class_prompt'], num_new_images, filename_texts,
+                                               concept['class_token'],
+                                               concept['instance_token'])
                 with accelerator.autocast(), torch.inference_mode():
                     generated_images = 0
                     s_len = sample_dataset.__len__() - 1
                     pbar = tqdm(total=num_new_images)
                     while generated_images < num_new_images:
                         example = sample_dataset.__getitem__(random.randrange(0, s_len))
-                        concept_images = concept_pipeline(example["prompt"], num_inference_steps=concept.class_infer_steps,
-                                                  guidance_scale=concept.class_guidance_scale,
+                        concept_images = concept_pipeline(example["prompt"], num_inference_steps=concept['class_infer_steps'],
+                                                  guidance_scale=concept['class_guidance_scale'],
                                                   height=args.resolution,
                                                   width=args.resolution,
-                                                  negative_prompt=concept.class_negative_prompt,
+                                                  negative_prompt=concept['class_negative_prompt'],
                                                   num_images_per_prompt=args.sample_batch_size).images
 
                         for i, image in enumerate(concept_images):
@@ -634,7 +634,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
     if args.use_lora:
 
         args.learning_rate = args.lora_learning_rate
-        
+
         params_to_optimize = ([
                 {"params": itertools.chain(*unet_lora_params), "lr": args.lora_learning_rate},
                 {"params": itertools.chain(*text_encoder_lora_params), "lr": args.lora_txt_learning_rate},
@@ -778,7 +778,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
         concepts_cache = []
         for d_batch in tqdm(dataloader, desc="Caching latents", disable=True):
             c_concept = args.concepts_list[dataset.current_concept]
-            with_prior = c_concept.num_class_images > 0
+            with_prior = c_concept['num_class_images'] > 0
             with torch.no_grad():
                 d_batch["pixel_values"] = d_batch["pixel_values"].to(accelerator.device, non_blocking=True,
                                                                      dtype=weight_dtype)
@@ -1050,7 +1050,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
 
                     concept_index = train_dataset.current_concept
                     concept = args.concepts_list[concept_index]
-                    if concept.num_class_images > 0:
+                    if concept['num_class_images'] > 0:
                         # Chunk the noise and noise_pred into two parts and compute the loss on each part separately.
                         noise_pred, noise_pred_prior = torch.chunk(noise_pred, 2, dim=0)
                         noise, noise_prior = torch.chunk(noise, 2, dim=0)
