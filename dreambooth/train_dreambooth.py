@@ -316,6 +316,11 @@ def parse_args(input_args=None):
         default="default",
         help="Type of attention to use."
     )
+    parser.add_argument(
+        "--shuffle_tags",
+        type=bool,
+        default=False
+    )
 
     if input_args is not None:
         args = parser.parse_args(input_args)
@@ -336,6 +341,19 @@ def parse_args(input_args=None):
             logger.warning("You need not use --class_data_dir without --with_prior_preservation.")
         if args.class_prompt is not None:
             logger.warning("You need not use --class_prompt without --with_prior_preservation.")
+
+    if args.concepts_list is None:
+        args.concepts_list = [
+            {
+                "instance_prompt": args.instance_prompt,
+                "class_prompt": args.class_prompt,
+                "instance_data_dir": args.instance_data_dir,
+                "class_data_dir": args.class_data_dir
+            }
+        ]
+    else:
+        with open(args.concepts_list, "r") as f:
+            args.concepts_list = json.load(f)
 
     return args
 
