@@ -170,7 +170,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--num_class_images",
         type=int,
-        default=100,
+        default=12,
         help=(
             "Minimal class images for prior preservation loss. If there are not enough images already present in"
             " class_data_dir, additional images will be sampled with class_prompt."
@@ -348,7 +348,10 @@ def parse_args(input_args=None):
                 "instance_prompt": args.instance_prompt,
                 "class_prompt": args.class_prompt,
                 "instance_data_dir": args.instance_data_dir,
-                "class_data_dir": args.class_data_dir
+                "class_data_dir": args.class_data_dir,
+                "num_class_images":args.num_class_images,
+                "instance_token":"",
+                "class_token":""
             }
         ]
     else:
