@@ -351,7 +351,10 @@ def parse_args(input_args=None):
                 "class_data_dir": args.class_data_dir,
                 "num_class_images":args.num_class_images,
                 "instance_token":"",
-                "class_token":""
+                "class_token":"",
+                "class_negative_prompt":"",
+                "class_guidance_scale": 7.5,
+                "class_infer_steps":60
             }
         ]
     else:
