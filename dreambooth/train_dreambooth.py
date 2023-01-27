@@ -216,6 +216,12 @@ def parse_args(input_args=None):
         default=None,
         help="Total number of training steps to perform.  If provided, overrides num_train_epochs.",
     )
+    parser.add_argument(
+            "--epoch",
+            type=int,
+            default=0,
+            help="running number of training steps to perform.",
+        )
     parser.add_argument("--save_steps", type=int, default=500, help="Save checkpoint every X updates steps.")
     parser.add_argument(
         "--gradient_accumulation_steps",
@@ -706,7 +712,8 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
         tokenizer=tokenizer,
         size=args.resolution,
         center_crop=args.center_crop,
-        lifetime_steps=args.revision,
+        #lifetime_steps=args.revision,
+        lifetime_steps = -1,
         pad_tokens=args.pad_tokens,
         hflip=args.hflip,
         max_token_length=args.max_token_length,
@@ -774,7 +781,8 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                 tokenizer=tokenizer,
                 size=args.resolution,
                 center_crop=args.center_crop,
-                lifetime_steps=args.revision,
+                #lifetime_steps=args.revision,
+                lifetime_step = -1,
                 pad_tokens=args.pad_tokens,
                 hflip=args.hflip,
                 max_token_length=args.max_token_length,
@@ -1003,7 +1011,8 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
     progress_bar.set_description("Steps")
     global_step = 0
     global_epoch = 0
-    lifetime_step = args.revision
+    #lifetime_step = args.revision
+    lifetime_step = -1
     loss_avg = AverageMeter()
     text_enc_context = nullcontext() if args.train_text_encoder else torch.no_grad()
     training_complete = False
@@ -1095,7 +1104,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                     logs = {"loss": loss_avg.avg.item(), "lr": lr_scheduler.get_last_lr()[0],
                             "vram": f"{allocated}/{cached}GB"}
                     progress_bar.set_postfix(**logs)
-                    accelerator.log(logs, step=args.revision)
+                    #accelerator.log(logs, step=args.revision)
                     loss_avg.reset()
 
                 training_complete = global_step >= actual_train_steps
@@ -1111,7 +1120,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                             save_img = False
                             save_model = True
                         if save_img or save_model:
-                            args.save()
+                            #args.save()
                             save_weights()
                             args = from_file(args.model_name)
                             weights_saved = True
@@ -1127,7 +1136,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
 
                 progress_bar.update(args.train_batch_size)
                 global_step += args.train_batch_size
-                args.revision += args.train_batch_size
+                #args.revision += args.train_batch_size
 
             training_complete = global_step >= actual_train_steps
             accelerator.wait_for_everyone()
@@ -1137,7 +1146,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                 if not weights_saved:
                     save_img = False
                     save_model = True
-                    args.save()
+                    #args.save()
                     save_weights()
                     args = from_file(args.model_name)
                 msg = f"Training completed, total steps: {args.revision}"
@@ -1151,7 +1160,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
             break
 
         args.epoch += global_epoch
-        args.save()
+        #args.save()
         global_epoch += 1
 
         if training_complete:
@@ -1168,7 +1177,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                 save_img = False
                 save_model = True
             if save_img or save_model:
-                args.save()
+                #args.save()
                 save_weights()
                 args = from_file(args.model_name)
                 weights_saved = True
