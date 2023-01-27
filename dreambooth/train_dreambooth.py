@@ -25,7 +25,7 @@ from transformers import AutoTokenizer, PretrainedConfig, CLIPTextModel
 
 from extensions.sd_dreambooth_extension.dreambooth import xattention
 from extensions.sd_dreambooth_extension.dreambooth.SuperDataset import SuperDataset
-from extensions.sd_dreambooth_extension.dreambooth.db_config import DreamboothConfig, from_file
+from extensions.sd_dreambooth_extension.dreambooth.db_config import DreamboothConfig
 from extensions.sd_dreambooth_extension.dreambooth.diff_to_sd import compile_checkpoint
 from extensions.sd_dreambooth_extension.dreambooth.dreambooth import printm
 from extensions.sd_dreambooth_extension.dreambooth.finetune_utils import FilenameTextGetter, encode_hidden_state, \
@@ -907,8 +907,8 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                                                                subfolder="text_encoder",
                                                                revision=args.revision)
             pred_type = "epsilon"
-            if args.v2:
-                pred_type = "v_prediction"
+            #if args.v2:
+            #    pred_type = "v_prediction"
             scheduler = DDIMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", steps_offset=1,
                                       clip_sample=False, set_alpha_to_one=False, prediction_type=pred_type)
             if args.use_ema:
@@ -957,10 +957,10 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                             out_file = None
                             s_pipeline.save_pretrained(args.pretrained_model_name_or_path)
 
-                            compile_checkpoint('/opt/ml/model/',args.models_path,None,args.model_name, half=args.half_model, use_subdir=use_subdir,
-                                               reload_models=False, lora_path=out_file, log=False,
-                                               custom_model_name=custom_model_name
-                                               )
+                            #compile_checkpoint('/opt/ml/model/',args.models_path,None,args.model_name, half=args.half_model, use_subdir=use_subdir,
+                            #                   reload_models=False, lora_path=out_file, log=False,
+                            #                   custom_model_name=custom_model_name
+                            #                   )
                         if args.use_ema:
                             ema_unet.restore(unet.parameters())
 
@@ -1123,13 +1123,13 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                         #else:
                         #    save_img = args.save_preview_every and not global_step % args.save_preview_every
                         #    save_model = args.save_embedding_every and not global_step % args.save_embedding_every
-                        if training_complete:
-                            save_img = False
-                            save_model = True
+                        #if training_complete:
+                        save_img = False
+                        save_model = True
                         if save_img or save_model:
                             #args.save()
                             save_weights()
-                            args = from_file(args.model_name)
+                            #args = from_file(args.model_name)
                             weights_saved = True
 
 
@@ -1155,7 +1155,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                     save_model = True
                     #args.save()
                     save_weights()
-                    args = from_file(args.model_name)
+                    #args = from_file(args.model_name)
                 msg = f"Training completed, total steps: {args.revision}"
                 break
         except Exception as m:
@@ -1180,26 +1180,27 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
             #else:
             #    save_img = args.save_preview_every and not global_epoch % args.save_preview_every
             #    save_model = args.save_embedding_every and not global_epoch % args.save_embedding_every
-            if training_complete:
-                save_img = False
-                save_model = True
+            #if training_complete:
+            save_img = False
+            save_model = True
             if save_img or save_model:
                 #args.save()
                 save_weights()
-                args = from_file(args.model_name)
+                #args = from_file(args.model_name)
                 weights_saved = True
 
-        if args.epoch_pause_frequency > 0 and args.epoch_pause_time > 0:
-            if not global_epoch % args.epoch_pause_frequency:
-                print(f"Giving the GPU a break for {args.epoch_pause_time} seconds.")
-                for i in range(args.epoch_pause_time):
-                    time.sleep(1)
+        #if args.epoch_pause_frequency > 0 and args.epoch_pause_time > 0:
+        #    if not global_epoch % args.epoch_pause_frequency:
+        #        print(f"Giving the GPU a break for {args.epoch_pause_time} seconds.")
+        #        for i in range(args.epoch_pause_time):
+        #            time.sleep(1)
 
         if training_complete:
             break
 
     cleanup_memory()
     accelerator.end_training()
+    printm(msg)
     return args, mem_record, msg
 
 if __name__ == '__main__':
