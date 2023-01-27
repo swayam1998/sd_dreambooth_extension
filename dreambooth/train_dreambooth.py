@@ -202,7 +202,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--center_crop", action="store_true", help="Whether to center crop images before resizing to resolution"
     )
-    parser.add_argument("--train_text_encoder", action="store_true", help="Whether to train the text encoder")
+    parser.add_argument("--train_text_encoder", type=bool,default=False, help="Whether to train the text encoder")
     parser.add_argument(
         "--train_batch_size", type=int, default=4, help="Batch size (per device) for the training dataloader."
     )
@@ -225,7 +225,8 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--gradient_checkpointing",
-        action="store_true",
+        type=bool,
+        default=True,
         help="Whether or not to use gradient checkpointing to save memory at the expense of slower backward pass.",
     )
     parser.add_argument(
@@ -287,7 +288,9 @@ def parse_args(input_args=None):
             " flag passed with the `accelerate.launch` command. Use this argument to override the accelerate config."
         ),
     )
-    parser.add_argument("--not_cache_latents", action="store_true",
+    parser.add_argument("--not_cache_latents",
+                        type=bool,
+                        default=True,
                         help="Do not precompute and cache latents from VAE.")
     parser.add_argument("--hflip", action="store_true", help="Apply horizontal flip data augmentation.")
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
