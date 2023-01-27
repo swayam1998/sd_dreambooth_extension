@@ -166,6 +166,13 @@ def parse_args(input_args=None):
         type=bool,
         help="Flag to add prior preservation loss.",
     )
+
+    parser.add_argument(
+                "--save_use_global_counts",
+                default=False,
+                type=bool,
+   )
+
     parser.add_argument(
             "--save_use_epochs",
             default=False,
@@ -1110,12 +1117,12 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                 training_complete = global_step >= actual_train_steps
                 if not args.save_use_epochs:
                     if global_step > 0:
-                        if args.save_use_global_counts:
-                            save_img = args.save_preview_every and not args.revision % args.save_preview_every
-                            save_model = args.save_embedding_every and not args.revision % args.save_embedding_every
-                        else:
-                            save_img = args.save_preview_every and not global_step % args.save_preview_every
-                            save_model = args.save_embedding_every and not global_step % args.save_embedding_every
+                        #if args.save_use_global_counts:
+                        #    save_img = args.save_preview_every and not args.revision % args.save_preview_every
+                        #    save_model = args.save_embedding_every and not args.revision % args.save_embedding_every
+                        #else:
+                        #    save_img = args.save_preview_every and not global_step % args.save_preview_every
+                        #    save_model = args.save_embedding_every and not global_step % args.save_embedding_every
                         if training_complete:
                             save_img = False
                             save_model = True
@@ -1167,12 +1174,12 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
             break
 
         if args.save_use_epochs:
-            if args.save_use_global_counts:
-                save_img = args.save_preview_every and not args.epoch % args.save_preview_every
-                save_model = args.save_embedding_every and not args.epoch % args.save_embedding_every
-            else:
-                save_img = args.save_preview_every and not global_epoch % args.save_preview_every
-                save_model = args.save_embedding_every and not global_epoch % args.save_embedding_every
+            #if args.save_use_global_counts:
+            #    save_img = args.save_preview_every and not args.epoch % args.save_preview_every
+            #    save_model = args.save_embedding_every and not args.epoch % args.save_embedding_every
+            #else:
+            #    save_img = args.save_preview_every and not global_epoch % args.save_preview_every
+            #    save_model = args.save_embedding_every and not global_epoch % args.save_embedding_every
             if training_complete:
                 save_img = False
                 save_model = True
