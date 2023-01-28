@@ -1156,7 +1156,7 @@ def main(args: DreamboothConfig, memory_record, use_subdir, lora_model=None, lor
                     #args.save()
                     save_weights()
                     #args = from_file(args.model_name)
-                msg = f"Training completed, total steps: {args.revision}"
+                msg = f"Training completed, total steps: {actual_train_steps}"
                 break
         except Exception as m:
             msg = f"Exception while training: {m}"
