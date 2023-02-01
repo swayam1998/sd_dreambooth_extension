@@ -955,7 +955,7 @@ def main(args, memory_record, use_subdir, lora_model=None, lora_alpha=1.0, lora_
                             print(f"\nLora weights successfully saved to {lora_path}")
                         else:
                             out_file = None
-                            s_pipeline.save_pretrained(args.pretrained_model_name_or_path)
+                            s_pipeline.save_pretrained(args.models_path)
 
                             #compile_checkpoint('/opt/ml/model/',args.models_path,None,args.model_name, half=args.half_model, use_subdir=use_subdir,
                             #                   reload_models=False, lora_path=out_file, log=False,
