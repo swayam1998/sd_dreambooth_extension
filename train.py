@@ -88,7 +88,7 @@ def upload_single_file(src_local_path, dest_s3_path):
         return False
     print(f'Uploading file successful. | src: {src_local_path} | dest: {dest_s3_path}')
 
-
+    
 def upload_files(path_local, path_s3):
     """
     上传（重复上传覆盖同名文件）
@@ -96,10 +96,10 @@ def upload_files(path_local, path_s3):
     :param path_s3: s3路径
     """
     print(f'Start upload files.')
-
+ 
     if not upload_single_file(path_local, path_s3):
         print(f'Upload files failed.')
-
+ 
     print(f'Upload files successful.')
 
 
@@ -444,7 +444,7 @@ def parse_args(input_args=None):
         with open(args.concepts_list, "r") as f:
             args.concepts_list = json.load(f)
 
-    print(args.__dict__)
+    print(args.__dict__)        
     return args
 
 
@@ -1017,7 +1017,7 @@ def main(args, memory_record, use_subdir, lora_model=None, lora_alpha=1.0, lora_
                         else:
                             out_file = None
                             s_pipeline.save_pretrained(args.models_path)
-
+                            
                             ###  manually upload trained db model dirs to s3 path#####
                             #### to eliminate sagemaker tar process#####
                             print(f"manul_upload_model_path is {args.manul_upload_model_path}")
