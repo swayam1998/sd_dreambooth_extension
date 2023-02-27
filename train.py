@@ -36,6 +36,7 @@ from extensions.sd_dreambooth_extension.dreambooth.utils import cleanup, list_fe
 from extensions.sd_dreambooth_extension.lora_diffusion.lora import weight_apply_lora, inject_trainable_lora, \
     save_lora_weight
 
+#import deepspeed
 
 pil_features = list_features()
 mem_record = {}
@@ -989,6 +990,15 @@ def main(args, memory_record, use_subdir, lora_model=None, lora_alpha=1.0, lora_
             )
 
             s_pipeline = s_pipeline.to(accelerator.device)
+
+            ### add deepspeed accelerate ################
+            #deepspeed.init_inference(
+            #    model=getattr(ds_pipeline,"model", ds_pipeline),      # Transformers models
+            #    mp_size=1,        # Number of GPU
+            #    dtype=torch.float16, # dtype of the weights (fp16)
+            #    replace_method="auto", # Lets DS autmatically identify the layer to replace
+            #    replace_with_kernel_inject=False, # replace the model with the kernel injector
+            #)
 
             with accelerator.autocast(), torch.inference_mode():
                 if save_model:
